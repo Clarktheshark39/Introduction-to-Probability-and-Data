@@ -1,0 +1,110 @@
+---
+title: "Exploring the BRFSS data"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+The following is an exploration and dive into the Behavioral Risk Factor Surveillance System (BRFSS) data, which is built of a collection of 400,000 plus annual interveiws with questions and answers regarding a wide range of health related characteristics. 
+
+### Load packages
+
+The following are packages needed to run the below analysis of the BRFSS data.
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+### Load data
+
+The data is read in via a url link to the dataset. 
+
+```{r load-data, cache=TRUE}
+URL <- "https://d18ky98rnyall9.cloudfront.net/_384b2d9eda4b29131fb681b243a7767d_brfss2013.RData?Expires=1487808000&Signature=G8IePZUxnzkO82tsaOF2jVaSuIHVPI9xz-SHy8TK-EK2FQjB5cqjzGFZGcHmzqN2jVPYxOMtBhoxMk3sDSBzzn3dBRYoFAwyJltmUdKltcF0hvXyArEaO~k8GhQ5~AsT1ZcFzQh7S-uEHNH6XG50YuSR~UCt~9noa0WbnSTbUNY_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A"
+download.file(URL, "~/Desktop/Coursera/Intro to Stats/Project/brfss2013.RData", method = "curl")
+load("brfss2013.RData")
+```
+
+* * *
+
+## Part 1: Data
+
+The BRFSS data is "observational" rather than "experimental" in nature, which immediately rules out any conclusions that can be drawn regarding causal relationships between variables. This type of data does, however, enable relationships to be generalized to the total population the data was sampled from. That being said, the data must have been collected using random sampling in order for it to be truely generalizable. 
+
+The data gathered via the BRFSS is done so "randomly", but the data is still collected via telephone interveiws strictly. This introduces a "convenience sampling" problem because those that are interveiwed are only those with a telephone (either land line or cellphone). 
+
+When collecting data over the phone, certain variables are also likely to be influenced by the medium of the phone. Also, those interveiwed may show a systematic reluctance to share truthful information regarding certain questions. This would be reflective of the self-serving bias. 
+
+* * *
+
+## Part 2: Research questions
+
+**Research quesion 1:**
+
+How does the amount of sleep reported relate to the amount of exercise reported?
+
+**Research quesion 2:**
+
+**Research quesion 3:**
+
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+Below each questions listed above will be further explored and the given data will be processed in order to allow this data analysis. 
+
+**Research quesion 1:**
+
+Firstly, we take a look at the summary statistics and distribution of the amount of sleep reported. In order to do this, we need to select out and summarize the sleep data. Below is a histogram showing the amount of sleep reported across all those interveiwed. 
+
+```{r All Sleep Processing}
+sleep <- brfss2013$sleptim1[!(is.na(brfss2013$sleptim1))]
+ggplot() + aes(sleep)+ geom_histogram(binwidth=1, colour="black", fill="white")
+
+brfss2013 %>% 
+  group_by("sleptim1") %>% 
+  summarise(count = n())
+```
+
+The histogram reveals that there are outliers within the sleep data. We can explore these outliers in order to determine which values should be included, and which should not. 
+
+```{r Sleep Outliers}
+range(sleep)
+```
+
+We know that no one is capable of not sleeping and surviving over any longer period of time, and that sleeping greater than 24 hours is impossible, as the day is only 24 hours long. We will now eliminate all values that are 0 or 24 and greater, then take another look at the distribution of data.
+
+```{r}
+sleep <- subset(sleep, sleep > 0 & sleep < 24)
+ggplot() + aes(sleep)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = 7.05, color = "dodgerblue")
+summary(sleep)
+IQR(sleep) #maybe check pnorm 25% to 75%? check if this is a normal distribution? 
+```
+
+While there are still values very close to 24 hours and 0 hours of sleep, whether these are accurate data points is up for some debate, and so I will include these values and work with the cleaned sleep data. 
+
+```{r}
+summary(sleep)
+```
+
+
+**Research quesion 2:**
+
+```{r}
+
+```
+
+
+
+**Research quesion 3:**
+
+```{r}
+
+```
+
