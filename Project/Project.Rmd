@@ -26,8 +26,10 @@ The data is read in via a url link to the dataset.
 
 ```{r load-data, cache=TRUE}
 URL <- "https://d18ky98rnyall9.cloudfront.net/_384b2d9eda4b29131fb681b243a7767d_brfss2013.RData?Expires=1487808000&Signature=G8IePZUxnzkO82tsaOF2jVaSuIHVPI9xz-SHy8TK-EK2FQjB5cqjzGFZGcHmzqN2jVPYxOMtBhoxMk3sDSBzzn3dBRYoFAwyJltmUdKltcF0hvXyArEaO~k8GhQ5~AsT1ZcFzQh7S-uEHNH6XG50YuSR~UCt~9noa0WbnSTbUNY_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A"
-download.file(URL, "~/Desktop/Coursera/Intro to Stats/Project/brfss2013.RData", method = "curl")
-load("brfss2013.RData")
+# for Mac: download.file(URL, "~/Desktop/Coursera/Intro to Stats/Project/brfss2013.RData", method = "curl")
+# for PC: 
+# download.file(URL, "C:/Users/cporter01/Documents/Coursera/Intro to Probability and Stats/Project/brfss.RData")
+load("brfss.RData")
 ```
 
 * * *
@@ -46,12 +48,15 @@ When collecting data over the phone, certain variables are also likely to be inf
 
 **Research quesion 1:**
 
-How does the amount of sleep reported relate to the amount of exercise reported?
+How does the amount of sleep reported relate to overall health reported?
 
 **Research quesion 2:**
 
+How does the amount of exercise reported relate to overall health reported?
+
 **Research quesion 3:**
 
+How does the amount of fruits and vegetables eaten relate to overall health reported?
 
 * * *
 
@@ -61,33 +66,34 @@ Below each questions listed above will be further explored and the given data wi
 
 **Research quesion 1:**
 
-Firstly, we take a look at the summary statistics and distribution of the amount of sleep reported. In order to do this, we need to select out and summarize the sleep data. Below is a histogram showing the amount of sleep reported across all those interveiwed. 
+Initially we take a look at raw data, ultimately hoping to get a look at the summary statistics and distribution of the amount of sleep reported. Below the "NA" or missing values are removed and then a histogram showing the amount of sleep reported across all those interveiwed is coded. 
 
 ```{r All Sleep Processing}
 sleep <- brfss2013$sleptim1[!(is.na(brfss2013$sleptim1))]
 ggplot() + aes(sleep)+ geom_histogram(binwidth=1, colour="black", fill="white")
 
-brfss2013 %>% 
-  group_by("sleptim1") %>% 
-  summarise(count = n())
+# brfss2013 %>% 
+#   group_by("sleptim1") %>% 
+#   summarise(count = n())
 ```
 
-The histogram reveals that there are outliers within the sleep data. We can explore these outliers in order to determine which values should be included, and which should not. 
+The histogram reveals that there are outliers within the sleep data. We can explore these outliers in order to determine which values should be included, and which should not.
 
 ```{r Sleep Outliers}
-range(sleep)
+unique(sleep)
 ```
 
-We know that no one is capable of not sleeping and surviving over any longer period of time, and that sleeping greater than 24 hours is impossible, as the day is only 24 hours long. We will now eliminate all values that are 0 or 24 and greater, then take another look at the distribution of data.
+Because no one is capable of not sleeping and surviving over any significant amount of time and sleeping greater than 24 hours is impossible, as the day is only 24 hours long, some of the collected data can be removed. We will now eliminate all values that are 0 or 24 and greater, then take another look at the distribution of data.
 
-```{r}
+```{r Cleaned Sleep Histo}
 sleep <- subset(sleep, sleep > 0 & sleep < 24)
-ggplot() + aes(sleep)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = 7.05, color = "dodgerblue")
+ggplot() + aes(sleep)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = 7.05, color = "blue", linetype = 2)
 summary(sleep)
-IQR(sleep) #maybe check pnorm 25% to 75%? check if this is a normal distribution? 
 ```
 
-While there are still values very close to 24 hours and 0 hours of sleep, whether these are accurate data points is up for some debate, and so I will include these values and work with the cleaned sleep data. 
+While there are still values very close to 24 hours and 0 hours of sleep, whether these are accurate data points is up for some debate, and so they will be included with the cleaned sleep data. We can see that the mean and median are both very close to 7 hours of sleep across the population.
+
+Now that we have the sleep data relatively clean, we can process the 
 
 ```{r}
 summary(sleep)
