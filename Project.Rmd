@@ -1,0 +1,153 @@
+---
+title: "Exploring the BRFSS data"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+The following is an exploration and dive into the Behavioral Risk Factor Surveillance System (BRFSS) data, which is built of a collection of 400,000 plus annual interveiws with questions and answers regarding a wide range of health related characteristics. 
+
+### Load packages
+
+The following are packages needed to run the below analysis of the BRFSS data.
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+### Load data
+
+The data is read in via a url link to the dataset. 
+
+```{r load-data, cache=TRUE}
+URL <- "https://d18ky98rnyall9.cloudfront.net/_384b2d9eda4b29131fb681b243a7767d_brfss2013.RData?Expires=1487808000&Signature=G8IePZUxnzkO82tsaOF2jVaSuIHVPI9xz-SHy8TK-EK2FQjB5cqjzGFZGcHmzqN2jVPYxOMtBhoxMk3sDSBzzn3dBRYoFAwyJltmUdKltcF0hvXyArEaO~k8GhQ5~AsT1ZcFzQh7S-uEHNH6XG50YuSR~UCt~9noa0WbnSTbUNY_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A"
+# for Mac: 
+download.file(URL, "~/Desktop/Coursera/Intro to Stats/Project/brfss2013.RData", method = "curl")
+# for PC: 
+# download.file(URL, "C:/Users/cporter01/Documents/Coursera/Intro to Probability and Stats/Project/brfss.RData")
+load("~/Desktop/Coursera/Intro to Stats/Project/brfss2013.RData")
+```
+
+* * *
+
+## Part 1: Data
+
+The BRFSS data is "observational" rather than "experimental" in nature, which immediately rules out any conclusions that can be drawn regarding causal relationships between variables. This type of data does, however, enable relationships to be generalized to the total population the data was sampled from. That being said, the data must have been collected using random sampling in order for it to be truely generalizable. 
+
+The data gathered via the BRFSS is done so "randomly", but the data is still collected via telephone interveiws strictly. This introduces a "convenience sampling" problem because those that are interveiwed are only those with a telephone (either land line or cellphone). 
+
+When collecting data over the phone, certain variables are also likely to be influenced by the medium of the phone. Also, those interveiwed may show a systematic reluctance to share truthful information regarding certain questions. This would be reflective of the self-serving bias. 
+
+* * *
+
+## Part 2: Research questions
+
+**Research quesion 1:**
+
+How does the amount of sleep reported relate to overall health reported?
+
+**Research quesion 2:**
+
+How does the amount of exercise reported relate to overall health reported?
+
+**Research quesion 3:**
+
+How does the amount of fruits and vegetables eaten relate to overall health reported?
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+Below each questions listed above will be further explored and the given data will be processed in order to allow this data analysis. 
+
+**Research quesion 1:**
+
+Initially we take a look at raw data, ultimately hoping to get a look at the summary statistics and distribution of the amount of sleep reported. Below the "NA" or missing values are removed and then a histogram showing the amount of sleep reported across all those interveiwed is coded. 
+
+```{r All Sleep Processing}
+sleep <- brfss2013$sleptim1[!(is.na(brfss2013$sleptim1))]
+ggplot() + aes(sleep)+ geom_histogram(binwidth=1, colour="black", fill="white")
+
+# brfss2013 %>% 
+#   group_by("sleptim1") %>% 
+#   summarise(count = n())
+```
+
+The histogram reveals that there are outliers within the sleep data. We can explore these outliers in order to determine which values should be included, and which should not.
+
+```{r Sleep Outliers}
+unique(sleep)
+```
+
+Because no one is capable of not sleeping and surviving over any significant amount of time and sleeping greater than 24 hours is impossible, as the day is only 24 hours long, some of the collected data can be removed. We will now eliminate all values that are 0 or 24 and greater, then take another look at the distribution of data.
+
+```{r Cleaned Sleep Histo}
+sleep <- subset(sleep, sleep > 0 & sleep < 24)
+ggplot() + aes(sleep)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = 7.05, color = "blue", linetype = 2)
+summary(sleep)
+```
+
+While there are still values very close to 24 hours and 0 hours of sleep, whether these are accurate data points is up for some debate, and so they will be included with the cleaned sleep data. We can see that the mean and median are both very close to 7 hours of sleep across the population.
+
+Now that we have the sleep data relatively clean, we can process the general health data according to the amount of sleep each participant recorded. 
+
+```{r Excellent Gen Health and Sleep}
+Excellent <- subset(brfss2013, brfss2013$genhlth == "Excellent")
+Excellent <- Excellent$sleptim1[!(is.na(Excellent$sleptim1))]
+Excellent <- subset(Excellent, Excellent > 0 & Excellent < 24)
+ggplot() + aes(Excellent)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = mean(Excellent), color = "blue", linetype = 2)
+summary(Excellent)
+```
+
+```{r Very Good Gen Health and Sleep}
+VG <- subset(brfss2013, brfss2013$genhlth == "Very good")
+VG <- VG$sleptim1[!(is.na(VG$sleptim1))]
+VG <- subset(VG, VG > 0 & VG < 24)
+ggplot() + aes(VG)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = mean(VG), color = "blue", linetype = 2)
+summary(VG)
+```
+
+```{r Good Gen Health and Sleep}
+Good <- subset(brfss2013, brfss2013$genhlth == "Good")
+Good <- Good$sleptim1[!(is.na(Good$sleptim1))]
+Good <- subset(Good, Good > 0 & Good < 24)
+ggplot() + aes(Good)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = mean(Good), color = "blue", linetype = 2)
+summary(Good)
+```
+
+```{r Fair Gen Health and Sleep}
+Excellent <- subset(brfss2013, brfss2013$genhlth == "Fair")
+Excellent <- Excellent$sleptim1[!(is.na(Excellent$sleptim1))]
+Excellent <- subset(Excellent, Excellent > 0 & Excellent < 24)
+ggplot() + aes(Excellent)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = mean(Excellent), color = "blue", linetype = 2)
+summary(Excellent)
+```
+
+```{r Poor Gen Health and Sleep}
+Excellent <- subset(brfss2013, brfss2013$genhlth == "Poor")
+Excellent <- Excellent$sleptim1[!(is.na(Excellent$sleptim1))]
+Excellent <- subset(Excellent, Excellent > 0 & Excellent < 24)
+ggplot() + aes(Excellent)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = mean(Excellent), color = "blue", linetype = 2)
+summary(Excellent)
+```
+
+
+**Research quesion 2:**
+
+```{r}
+
+```
+
+
+
+**Research quesion 3:**
+
+```{r}
+
+```
+
