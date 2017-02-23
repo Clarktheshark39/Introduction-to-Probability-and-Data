@@ -53,7 +53,7 @@ How does the amount of sleep reported relate to overall health reported?
 
 **Research quesion 2:**
 
-How does the amount of exercise reported relate to overall health reported?
+How does the amount of exercise reported relate to the amount of sleep reported?
 
 **Research quesion 3:**
 
@@ -121,25 +121,30 @@ summary(Good)
 ```
 
 ```{r Fair Gen Health and Sleep}
-Excellent <- subset(brfss2013, brfss2013$genhlth == "Fair")
-Excellent <- Excellent$sleptim1[!(is.na(Excellent$sleptim1))]
-Excellent <- subset(Excellent, Excellent > 0 & Excellent < 24)
-ggplot() + aes(Excellent)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = mean(Excellent), color = "blue", linetype = 2)
-summary(Excellent)
+Fair <- subset(brfss2013, brfss2013$genhlth == "Fair")
+Fair <- Fair$sleptim1[!(is.na(Fair$sleptim1))]
+Fair <- subset(Fair, Fair > 0 & Fair < 24)
+ggplot() + aes(Fair)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = mean(Fair), color = "blue", linetype = 2)
+summary(Fair)
 ```
 
 ```{r Poor Gen Health and Sleep}
-Excellent <- subset(brfss2013, brfss2013$genhlth == "Poor")
-Excellent <- Excellent$sleptim1[!(is.na(Excellent$sleptim1))]
-Excellent <- subset(Excellent, Excellent > 0 & Excellent < 24)
-ggplot() + aes(Excellent)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = mean(Excellent), color = "blue", linetype = 2)
-summary(Excellent)
+Poor <- subset(brfss2013, brfss2013$genhlth == "Poor")
+Poor <- Poor$sleptim1[!(is.na(Poor$sleptim1))]
+Poor <- subset(Poor, Poor > 0 & Poor < 24)
+ggplot() + aes(Poor)+ geom_histogram(binwidth=1, colour="black", fill="white") + geom_vline(xintercept = mean(Poor), color = "blue", linetype = 2)
+summary(Poor)
 ```
 
+We can see above that there is a clear relationship between the mean amount of sleep reported and general health reported. While the reported numbers are discrete, as the sleep is only recorded in whole hour integers, we can even see the median move from 7 hours, for the 4 "most healthy" categorical variables, to 6 hours. 
 
 **Research quesion 2:**
 
+Now that we have observed a clear decrease in sleep as reported general health decreases, let's look into the relationship between sleep and exercise. To do this, I will split the data into 8 evenly split groups based on the amount of sleep reported and look at the amoung of exercise reported for each group.
+
 ```{r}
+sleep <- brfss2013[!(is.na(brfss2013$sleptim1)), ]
+sleep <- subset(sleep, sleep$sleptim1 > 0 & sleep$sleptim1 < 24)
 
 ```
 
