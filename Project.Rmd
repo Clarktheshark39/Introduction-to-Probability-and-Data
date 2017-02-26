@@ -26,10 +26,7 @@ The data is read in via a url link to the dataset.
 
 ```{r load-data, cache=TRUE}
 URL <- "https://d18ky98rnyall9.cloudfront.net/_384b2d9eda4b29131fb681b243a7767d_brfss2013.RData?Expires=1487808000&Signature=G8IePZUxnzkO82tsaOF2jVaSuIHVPI9xz-SHy8TK-EK2FQjB5cqjzGFZGcHmzqN2jVPYxOMtBhoxMk3sDSBzzn3dBRYoFAwyJltmUdKltcF0hvXyArEaO~k8GhQ5~AsT1ZcFzQh7S-uEHNH6XG50YuSR~UCt~9noa0WbnSTbUNY_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A"
-# for Mac: 
 download.file(URL, "~/Desktop/Coursera/Intro to Stats/Project/brfss2013.RData", method = "curl")
-# for PC: 
-# download.file(URL, "C:/Users/cporter01/Documents/Coursera/Intro to Probability and Stats/Project/brfss.RData")
 load("~/Desktop/Coursera/Intro to Stats/Project/brfss2013.RData")
 ```
 
@@ -57,7 +54,7 @@ How does the amount of exercise reported relate to the amount of sleep reported?
 
 **Research quesion 3:**
 
-How does the amount of fruits and vegetables eaten relate to overall health reported?
+How does income relate to overall health reported?
 
 * * *
 
@@ -72,10 +69,6 @@ Initially we take a look at raw data, ultimately hoping to get a look at the sum
 ```{r All Sleep Processing}
 sleep <- brfss2013$sleptim1[!(is.na(brfss2013$sleptim1))]
 ggplot() + aes(sleep)+ geom_histogram(binwidth=1, colour="black", fill="white")
-
-# brfss2013 %>% 
-#   group_by("sleptim1") %>% 
-#   summarise(count = n())
 ```
 
 The histogram reveals that there are outliers within the sleep data. We can explore these outliers in order to determine which values should be included, and which should not.
@@ -140,19 +133,92 @@ We can see above that there is a clear relationship between the mean amount of s
 
 **Research quesion 2:**
 
-Now that we have observed a clear decrease in sleep as reported general health decreases, let's look into the relationship between sleep and exercise. To do this, I will split the data into 8 evenly split groups based on the amount of sleep reported and look at the amoung of exercise reported for each group.
+Now that we have observed a clear decrease in sleep as reported general health decreases, let's look into the relationship between sleep and exercise. To do this, I will split the exercise (exeroft1) data into 8 evenly split groups and compare the amoung of sleep reported for each group.
 
-```{r}
-sleep <- brfss2013[!(is.na(brfss2013$sleptim1)), ]
-sleep <- subset(sleep, sleep$sleptim1 > 0 & sleep$sleptim1 < 24)
-
+```{r Exercise Processing}
+exercise <- brfss2013[!(is.na(brfss2013$exeroft1)), ]
+exercise <- exercise[!(is.na(exercise$sleptim1)), ]
+# Plot histrogram to get a feel for the data.
+ggplot(exercise, aes(x = exeroft1)) + geom_histogram(bins = 100)
+# The data clusters at a little over 100 and a little over 200 times walking.
+# Below we split the data into 8 different groups in order to campare different levels of exercise and amount of sleep reported.
+quantile(exercise$exeroft1, c(1/8, 1/4, 3/8, 1/2, 5/8, 3/4, 7/8))
+ex1 <- subset(exercise, exercise$exeroft1 <= 102)
+ex2 <- subset(exercise, exercise$exeroft1 > 102 & exercise$exeroft1 <= 103)
+ex3 <- subset(exercise, exercise$exeroft1 > 103 & exercise$exeroft1 <= 104)
+ex4 <- subset(exercise, exercise$exeroft1 > 104 & exercise$exeroft1 <= 105)
+ex5 <- subset(exercise, exercise$exeroft1 > 105 & exercise$exeroft1 <= 107)
+ex6 <- subset(exercise, exercise$exeroft1 > 107 & exercise$exeroft1 <= 203)
+ex7 <- subset(exercise, exercise$exeroft1 > 203 & exercise$exeroft1 <= 215)
+ex8 <- subset(exercise, exercise$exeroft1 > 215)
 ```
 
+Now that we have 8 groups divided by the amount of exercise reported, we will look at the summary of each group's sleep data and also plot the average amount of sleep per exercise group on a single plot.
 
+```{r ExSlp Summaries and Plot}
+summary(ex1$sleptim1)
+summary(ex2$sleptim1)
+summary(ex3$sleptim1)
+summary(ex4$sleptim1)
+summary(ex5$sleptim1)
+summary(ex6$sleptim1)
+summary(ex7$sleptim1)
+summary(ex8$sleptim1)
+slpex <- data.frame(Ex.Group = c("exgrp1", "exgrp2", "exgrp3", "exgrp4", "exgrp5", "exgrp6", "exgrp7", "exgrp8"), Avg.Slp = c(mean(ex1$sleptim1), mean(ex2$sleptim1), mean(ex3$sleptim1), mean(ex4$sleptim1), mean(ex5$sleptim1), mean(ex6$sleptim1), mean(ex7$sleptim1), mean(ex8$sleptim1)))
+ggplot(slpex, aes(x = Ex.Group, y = Avg.Slp, group = 1)) + 
+  geom_line() + 
+  geom_point() + 
+  xlab("Exercise Group") + 
+  ylab("Average Hours of Sleep") + 
+  ggtitle("Sleep vs Exercise") + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) +
+  geom_hline(yintercept = mean(exercise$sleptim1), linetype = "dashed", color = "blue")
+```
+
+Interestingly, there is no obvious relationship between the amount of sleep someone gets and the amount of exercise they perform. If you were to split the data into halves, the group permornig less exercise would have a much higher average sleep amount, but there is not clear linear relationship between amount of sleep and exercise.
 
 **Research quesion 3:**
 
-```{r}
+Below is a brief look at the relationship between income level and general health. First we will take a look at the income data, then plot the income data and general health data together.
 
+```{r Income Data Summary}
+Income <- brfss2013$income2
+Income <- Income[!is.na(Income)]
+summary(Income)
 ```
 
+We can see through this summary the different levels of Income that have been designated. The categories are each assigned a numerical value below, where the lowest income level is 1 and the highest is 8.
+
+```{r Income Histo}
+Income <- as.numeric(Income)
+hist(Income)
+```
+
+We can see that there are more and more data points as we jump higher and higher within the income levels, and that the highest level of income has the most amount of datapoints.
+
+If we plot the the General Health data alongside the Income data, we can get a feel for how the two relate.
+
+```{r Income and Health}
+IncHlth <- select(brfss2013, income2, genhlth)
+IncHlth <- IncHlth[!is.na(IncHlth$income2), ]
+IncHlth <- IncHlth[!is.na(IncHlth$genhlth), ]
+IncHlth$income2 <- as.numeric(IncHlth$income2)
+IncHlth$genhlth <- as.numeric(IncHlth$genhlth)
+# Create groups by General Health and see how Income level is affected.
+Excellent <- subset(IncHlth, IncHlth$genhlth == 1)
+VG <- subset(IncHlth, IncHlth$genhlth == 2)
+Good <- subset(IncHlth, IncHlth$genhlth == 3)
+Fair <- subset(IncHlth, IncHlth$genhlth == 4)
+Poor <- subset(IncHlth, IncHlth$genhlth == 5)
+IncHlth <- data.frame(General.Health = c("Excellent", "Very good", "Good", "Fair", "Poor"), Avg.Income.Level = c(mean(Excellent$income2), mean(VG$income2), mean(Good$income2), mean(Fair$income2), mean(Poor$income2)))
+# Below we plot the relationship between income level and general healthy.
+ggplot(IncHlth, aes(x = reorder(General.Health, Avg.Income.Level, sum), y = Avg.Income.Level, group = 1)) +
+  geom_point() +
+  geom_line() +
+  ylab("Income Category (1 = Lowest Income Level)") +
+  xlab("General Health Category") +
+  ggtitle("Income vs General Health") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+```
+
+The above plot shows that there is a very strong relationship between the reported general healthy and income level in this data. With a slope close to one, moving one categorical level in Income typically correlates to a full categorical jump of General Health in the same direction. This data points to a strong positive correlation between the two variables. 
